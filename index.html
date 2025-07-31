@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, Hina!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1579298245158-33e843c054e0?q=80&w=2670&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 9999px; /* rounded-full */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 100;
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+    <div class="confetti-container" id="confetti-canvas-container"></div>
+    <!-- Message Box for user feedback -->
+    <div id="messageBox" class="message-box bg-red-500 text-white font-bold transition-opacity duration-300"></div>
+
+    <main class="w-full max-w-2xl bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-2xl shadow-xl p-8 md:p-12 text-center transform transition-transform duration-500 hover:scale-105">
+        <h1 class="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600 mb-2 drop-shadow-lg">
+            Happy Birthday!
+        </h1>
+        <h2 class="text-3xl md:text-5xl font-extrabold mb-4 text-purple-200 drop-shadow-md">
+            Hina
+        </h2>
+
+        <p id="birthdayMessage" class="text-lg md:text-xl text-gray-200 mb-8 max-w-prose mx-auto font-medium leading-relaxed">
+            Wishing you a day filled with joy, laughter, and everything that makes you happy. May your year be as wonderful as you are!
+        </p>
+
+        <div class="flex flex-col md:flex-row justify-center items-center gap-4">
+            <button id="surpriseButton" class="px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-pink-500 to-purple-600 rounded-full shadow-lg hover:from-pink-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-purple-300 focus:ring-opacity-50">
+                Click for a Surprise!
+            </button>
+            <button id="generateMessageButton" class="px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-green-500 to-blue-600 rounded-full shadow-lg hover:from-green-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50">
+                Generate a ✨ Personal Message ✨
+            </button>
+            <button id="readAloudButton" class="px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-red-600 rounded-full shadow-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50">
+                Read Message Aloud ✨
+            </button>
+        </div>
+    </main>
+
+    <script>
+        const surpriseButton = document.getElementById('surpriseButton');
+        const generateMessageButton = document.getElementById('generateMessageButton');
+        const readAloudButton = document.getElementById('readAloudButton');
+        const birthdayMessage = document.getElementById('birthdayMessage');
+        const confettiContainer = document.getElementById('confetti-canvas-container');
+        const messageBox = document.getElementById('messageBox');
+
+        // Function to show a temporary message box
+        function showMessageBox(message, type = 'error', duration = 3000) {
+            messageBox.textContent = message;
+            messageBox.style.display = 'block';
+            if (type === 'error') {
+                messageBox.classList.remove('bg-green-500');
+                messageBox.classList.add('bg-red-500');
+            } else {
+                messageBox.classList.remove('bg-red-500');
+                messageBox.classList.add('bg-green-500');
+            }
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, duration);
+        }
+
+        // Happy Birthday audio URL (royalty-free)
+        const audioUrl = "https://cdn.pixabay.com/audio/2021/08/04/audio_3d19339798.mp3";
+        const birthdayAudio = new Audio(audioUrl);
+
+        // Function to create a custom confetti explosion
+        const fireConfetti = () => {
+            const duration = 10 * 1000; // 10 seconds
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+
+                // Since we don't have the confetti canvas instance directly, we will use the global confetti
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+                    colors: ['#a864fd', '#29cdff', '#78ff44', '#ff718d', '#fdff6a']
+                });
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+                    colors: ['#a864fd', '#29cdff', '#78ff44', '#ff718d', '#fdff6a']
+                });
+            }, 250);
+        };
+
+        // Event listener for the surprise button
+        surpriseButton.addEventListener('click', () => {
+            // Play the audio
+            birthdayAudio.play();
+
+            // Trigger the confetti
+            fireConfetti();
+
+            // Disable the button to prevent multiple clicks and re-enable after 10 seconds
+            surpriseButton.disabled = true;
+            surpriseButton.textContent = 'Enjoy the Surprise!';
+            setTimeout(() => {
+                surpriseButton.disabled = false;
+                surpriseButton.textContent = 'Click for a Surprise!';
+            }, 10000);
+        });
+
+        // Preload the audio to prevent delay
+        birthdayAudio.load();
+
+        // Gemini API Text Generation for the birthday message
+        generateMessageButton.addEventListener('click', async () => {
+            generateMessageButton.disabled = true;
+            generateMessageButton.textContent = 'Generating...';
+
+            const prompt = `Write a heartfelt, warm, and slightly poetic birthday message for a person named Hina. Make the message around 4-5 sentences long.`;
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            try {
+                const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                
+                let response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                // Exponential backoff for retries
+                let retries = 0;
+                while (response.status === 429 && retries < 5) {
+                    const delay = Math.pow(2, retries) * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    retries++;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                const generatedText = result.candidates[0].content.parts[0].text;
+                birthdayMessage.textContent = generatedText;
+                showMessageBox('Message generated successfully!', 'success');
+            } catch (error) {
+                console.error('Error generating message:', error);
+                showMessageBox('Failed to generate message. Please try again.');
+            } finally {
+                generateMessageButton.disabled = false;
+                generateMessageButton.textContent = 'Generate a ✨ Personal Message ✨';
+            }
+        });
+
+        // Gemini API TTS for reading the message aloud
+        readAloudButton.addEventListener('click', async () => {
+            const message = birthdayMessage.textContent;
+            if (!message) {
+                showMessageBox('No message to read aloud.');
+                return;
+            }
+
+            readAloudButton.disabled = true;
+            readAloudButton.textContent = 'Reading...';
+            
+            const payload = {
+                contents: [{
+                    parts: [{ text: message }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: "Puck" }
+                        }
+                    }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+            try {
+                let response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // Exponential backoff for retries
+                let retries = 0;
+                while (response.status === 429 && retries < 5) {
+                    const delay = Math.pow(2, retries) * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    retries++;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 16000; // Default to 16000 if not found
+
+                    // Helper function to decode base64
+                    function base64ToArrayBuffer(base64) {
+                        const binary_string = window.atob(base64);
+                        const len = binary_string.length;
+                        const bytes = new Uint8Array(len);
+                        for (let i = 0; i < len; i++) {
+                            bytes[i] = binary_string.charCodeAt(i);
+                        }
+                        return bytes.buffer;
+                    }
+
+                    // Helper function to convert PCM to WAV
+                    function pcmToWav(pcm16, sampleRate) {
+                        const dataLength = pcm16.length * 2;
+                        const buffer = new ArrayBuffer(44 + dataLength);
+                        const view = new DataView(buffer);
+                        let offset = 0;
+
+                        function writeString(str) {
+                            for (let i = 0; i < str.length; i++) {
+                                view.setUint8(offset++, str.charCodeAt(i));
+                            }
+                        }
+
+                        // RIFF identifier
+                        writeString('RIFF');
+                        view.setUint32(offset, 36 + dataLength, true); offset += 4;
+                        // file type
+                        writeString('WAVE');
+                        // format chunk identifier
+                        writeString('fmt ');
+                        view.setUint32(offset, 16, true); offset += 4;
+                        // format tag (1=PCM)
+                        view.setUint16(offset, 1, true); offset += 2;
+                        // channels
+                        view.setUint16(offset, 1, true); offset += 2;
+                        // sample rate
+                        view.setUint32(offset, sampleRate, true); offset += 4;
+                        // byte rate
+                        view.setUint32(offset, sampleRate * 2, true); offset += 4;
+                        // block align
+                        view.setUint16(offset, 2, true); offset += 2;
+                        // bits per sample
+                        view.setUint16(offset, 16, true); offset += 2;
+                        // data chunk identifier
+                        writeString('data');
+                        view.setUint32(offset, dataLength, true); offset += 4;
+
+                        // write PCM data
+                        for (let i = 0; i < pcm16.length; i++) {
+                            view.setInt16(offset, pcm16[i], true); offset += 2;
+                        }
+
+                        return new Blob([view], { type: 'audio/wav' });
+                    }
+
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+                    
+                    const ttsAudio = new Audio(audioUrl);
+                    ttsAudio.play();
+                    
+                    ttsAudio.onended = () => {
+                         readAloudButton.disabled = false;
+                         readAloudButton.textContent = 'Read Message Aloud ✨';
+                    };
+                    showMessageBox('Playing message!', 'success');
+                } else {
+                    throw new Error('Invalid audio data received.');
+                }
+            } catch (error) {
+                console.error('Error reading message aloud:', error);
+                showMessageBox('Failed to read message aloud. Please try again.');
+                readAloudButton.disabled = false;
+                readAloudButton.textContent = 'Read Message Aloud ✨';
+            }
+        });
+    </script>
+</body>
+</html>
