@@ -75,6 +75,8 @@
         const birthdayMessage = document.getElementById('birthdayMessage');
         const confettiContainer = document.getElementById('confetti-canvas-container');
         const messageBox = document.getElementById('messageBox');
+        
+        const API_KEY = "AIzaSyAH2Kzg75e1t9TebZGiIkGWnHxM75wZngw";
 
         // Function to show a temporary message box
         function showMessageBox(message, type = 'error', duration = 3000) {
@@ -107,7 +109,7 @@
             }
 
             const interval = setInterval(function() {
-                const timeLeft = animationEnd - Date.now();
+                const timeLeft = animationEnd - Date.Now();
 
                 if (timeLeft <= 0) {
                     return clearInterval(interval);
@@ -157,7 +159,7 @@
             generateMessageButton.textContent = 'Generating...';
 
             const prompt = `Write a heartfelt, warm, and slightly poetic birthday message for a person named Hina. Make the message around 4-5 sentences long.`;
-            const apiKey = "";
+            const apiKey = API_KEY;
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
             try {
@@ -225,7 +227,7 @@
                 },
                 model: "gemini-2.5-flash-preview-tts"
             };
-            const apiKey = "";
+            const apiKey = API_KEY;
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
 
             try {
